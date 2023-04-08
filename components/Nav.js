@@ -2,6 +2,7 @@ import {
   Box,
   Flex,
   Text,
+  Center,
   Avatar,
   Link,
   IconButton,
@@ -15,107 +16,165 @@ import {
   PopoverTrigger,
   PopoverContent,
   useDisclosure,
+  useOutsideClick,
   useBreakpointValue,
   useColorModeValue,
   useColorMode,
   Stack,
   Collapse,
-  Center,
 } from '@chakra-ui/react';
 import { 
-  MoonIcon, 
+  MoonIcon,
+  Search2Icon,
+  SearchIcon,
   SunIcon, 
   HamburgerIcon,
   CloseIcon,
   ChevronDownIcon,
   ChevronRightIcon,
 } from '@chakra-ui/icons';
+import { NAV_ITEMS } from '../data/navItems';
+import SearchBar from './SearchBar';
+import { AiOutlineSearch } from 'react-icons/ai';
+import React, { useRef } from 'react';
 
 
 export default function Nav() {
   const { isOpen, onToggle } = useDisclosure();
   const { colorMode, toggleColorMode } = useColorMode();
+  const { isOpen: isOpenSearch, onToggle: onToggleSearch, onOpen: onOpenSearch, onClose: onCloseSearch } = useDisclosure();
+  const logoTextAlignValue = useBreakpointValue({ base: 'center', lg: 'right' });
+  const logoColorValue = useColorModeValue('gray.800', 'white');
+  const searchRef = useRef();
+
+  useOutsideClick({
+    ref: searchRef,
+    handler: () => isOpenSearch && onCloseSearch(),
+  });
+
   return (
     <Box>
       <Flex
+        justify="center"
+        align="center"
         bg={useColorModeValue('white', 'gray.800')}
         color={useColorModeValue('gray.600', 'white')}
         minH={'60px'}
         py={{ base: 2 }}
         px={{ base: 4 }}
-        // borderBottom={1}
+        borderBottom={1}
         borderStyle={'solid'}
-        borderColor={useColorModeValue('gray.200', 'gray.900')}
-        align={'center'}>
+        borderColor={useColorModeValue('gray.200', 'gray.700')}        
+      >
         <Flex
-          flex={{ base: 1, lg: 'auto' }}
-          ml={{ base: -2 }}
-          display={{ base: 'flex', lg: 'none' }}>
-          <IconButton
-            onClick={onToggle}
-            icon={
-              isOpen ? <CloseIcon w={3} h={3} /> : <HamburgerIcon w={5} h={5} />
-            }
-            variant={'ghost'}
-            aria-label={'Toggle Navigation'}
-          />
-        </Flex>
-        <Flex 
-          flex={{ base: 1 }} 
-          justify={{ base: 'center', lg: 'start' }}
+          width={{
+            base: '100%',
+            sm: '100%', // 0-30em
+            md: '100%', // 30em-48em
+            lg: '1024px', // 48em-62em
+            xl: '1280px', // 62em+
+          }}
         >
-          <Link
-            textAlign={useBreakpointValue({ base: 'center', lg: 'right' })}
-            fontFamily={'heading'}
-            color={useColorModeValue('gray.800', 'white')}
-            fontSize={'md'}
-            fontWeight={700}
-            _hover={{
-              textDecoration: 'none',
-            }}>
-            D L Wiki
-          </Link>
-          <Flex display={{ base: 'none', lg: 'flex' }} ml={10}>
-            <DesktopNav />
+          <Flex
+            flex={{ base: 1, lg: 'auto' }}
+            ml={{ base: -2 }}
+            display={{ base: 'flex', lg: 'none' }}
+          >
+            <IconButton
+              onClick={onToggle}
+              icon={
+                isOpen ? <CloseIcon w={3} h={3} /> : <HamburgerIcon w={5} h={5} />
+              }
+              variant={'ghost'}
+              aria-label={'Toggle Navigation'}
+            />
           </Flex>
-        </Flex>
+          <Flex 
+            flex={{ base: 1 }} 
+            justify={{ base: 'center', lg: 'start' }}
+          >
+            <Center>
+              {!isOpenSearch && (
+                <Link
+                  textAlign={logoTextAlignValue}
+                  fontFamily={'heading'} 
+                  color={logoColorValue}
+                  fontSize={'md'}
+                  fontWeight={700}
+                  _hover={{
+                    textDecoration: 'none',
+                  }}>
+                  DL Wiki
+                </Link>
+              )}
 
-        <Stack
-          flex={{ base: 1, lg: 0 }}
-          justify={'flex-end'}
-          direction={'row'}
-          spacing={6}>
-          <Button onClick={toggleColorMode}
-            variant={'ghost'}
-            fontSize={'sm'}
-            fontWeight={400}>
-            {colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
-          </Button>
-          <Button
-            fontSize={'sm'}
-            fontWeight={400}
-            variant={'link'}
-            href={''}>
-            Sign In
-          </Button>
-          <Button
-            display={{ base: 'none', lg: 'inline-flex' }}
-            fontSize={'sm'}
-            fontWeight={500}
-            // bg={'pink.400'}
-            href={''}
-            // _hover={{
-            //   bg: 'pink.300',
-            // }}
+              <Flex display={{ base: 'none', lg: 'flex' }} ml={10} >
+                <DesktopNav />
+              </Flex>
+            </Center>
+          </Flex>
+
+          <Stack
+            flex={{ base: 1, lg: 1 }}
+            justify={'flex-end'}
+            direction={'row'}
+            spacing={{base: 0, lg: 6}}
+          >
+            <Flex
+              display={{ base: 'none', lg: 'inline-flex' }}
             >
-            Sign Up
-          </Button>
-        </Stack>
-      </Flex>
+              <SearchBar />
+            </Flex>
+            <Box ref={searchRef}>
 
-      {/* <Collapse  > */}
-        {isOpen && <MobileNav isOpen={isOpen} />}
-      {/* </Collapse> */}
+              {!isOpenSearch && (
+                <Button 
+                  onClick={isOpenSearch ? onCloseSearch : onOpenSearch}
+                  display={{ base: 1, lg: 'none' }}
+                  variant={'ghost'}
+                  fontSize={'sm'}
+                  fontWeight={400}>
+                  <SearchIcon />
+                </Button>
+              )}
+
+              {
+                isOpenSearch && (
+                  <SearchBar />
+                )
+              }
+            </Box>
+
+            <Button onClick={toggleColorMode}
+              variant={'ghost'}
+              fontSize={'sm'}
+              fontWeight={400}>
+              {colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
+            </Button>
+            <Button
+              display={{ base: 'none', lg: 'inline-flex' }}
+              fontSize={'sm'}
+              fontWeight={400}
+              variant={'link'}
+              href={''}>
+              Sign In
+            </Button>
+            <Button
+              display={{ base: 'none', lg: 'inline-flex' }}
+              fontSize={'sm'}
+              fontWeight={500}
+              // bg={'pink.400'}
+              href={''}
+              // _hover={{
+              //   bg: 'pink.300',
+              // }}
+              >
+              Sign Up
+            </Button>
+          </Stack>
+        </Flex>
+      </Flex>
+      {isOpen && <MobileNav isOpen={isOpen} />}
     </Box>
   );
 }
@@ -266,43 +325,3 @@ const MobileNavItem = ({ label, children, href }) => {
   );
 };
 
-const NAV_ITEMS = [
-  {
-    label: 'Inspiration',
-    children: [
-      {
-        label: 'Explore Design Work',
-        subLabel: 'Trending Design to inspire you',
-        href: '',
-      },
-      {
-        label: 'New & Noteworthy',
-        subLabel: 'Up-and-coming Designers',
-        href: '',
-      },
-    ],
-  },
-  {
-    label: 'Find Work',
-    children: [
-      {
-        label: 'Job Board',
-        subLabel: 'Find your dream design job',
-        href: '',
-      },
-      {
-        label: 'Freelance Projects',
-        subLabel: 'An exclusive list for contract work',
-        href: '',
-      },
-    ],
-  },
-  {
-    label: 'Learn Design',
-    href: '',
-  },
-  {
-    label: 'Hire Designers',
-    href: '',
-  },
-];
